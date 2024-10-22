@@ -13,6 +13,7 @@ numberOfMoves = -1
 initialGrid = []
 goalGrid = []
 
+# read in the file 
 with open(fileName, "r") as file:
     numberOfStacks, numberOfBlocks, numberOfMoves = [int(x) for x in next(file).split()]
     # skip a divider 
@@ -54,9 +55,10 @@ while True:
     # half temperature every 1000 iterations
     if i == 1000:
         t /= 2
-        print("Reducing t to " + str(t))
+        print("Halfing t to be " + str(t))
         i = 0
 
+    # if temperature is too low, break
     if t < tempThreshold:
         print("Reached threshold")
         finishedState = currentState
@@ -72,11 +74,11 @@ while True:
     if deltaE > 0:
         currentState = nextRandomState
     else:
+        # choose state based on probability
         probability = math.e**(deltaE / t)
         if random.random() <= probability:
             print("Choosing worse state by probability " + str(probability))
 
-
-
 # print out results
+print(currentState.print_solution_path())
 print("statistics: " + fileName + " method SimulatedAnnealing planlen " + str(currentState.get_level()) + " iters " + str(i))
