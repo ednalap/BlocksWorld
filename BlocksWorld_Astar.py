@@ -1,11 +1,11 @@
 import getopt, sys
 from State import State
-
+from queue import PriorityQueue
 
 # parse command lines
 # DEFAULT VALUES
 fileName = sys.argv[1]
-maxIterations = 10000
+maxIterations = 1000000
 
 # drop first arg (name of code file) and second (name of input file)
 argumentList = sys.argv[2:]
@@ -18,8 +18,8 @@ try:
 
     for currentArgument, currentValue in arguments:
         if currentArgument in ("-i", "--MAX_ITERS"):
-            maxIterations = int(currentValue)
-        elif currentArgument in ("--f", "-FILE"):
+            maxIterations = currentValue
+        elif currentArgument in ("-f", "--FILE"):
             fileName = currentValue
 
 except getopt.error as e:
@@ -46,6 +46,9 @@ with open(fileName, "r") as file:
         line = file.readline()
         goalGrid.append(line.strip())
         
+# print("numberOfStacks", numberOfStacks)
+# print("numberOfBlocks", numberOfBlocks)
+# print("numberOfMoves", numberOfMoves)
 # print("Initial")
 # print(initialGrid)
 # print("Goal")
@@ -56,16 +59,23 @@ goalState = State(0, None, goalGrid)
 
 # start BFS iteration
 maxQueueLength = 1
-stateQueue = []
-stateQueue.append(initialState)
+stateQueue = PriorityQueue()
+stateQueue.put((1, initialState))
 visitedStates = []
 finishedState = None
 
 # loop while not empty
 i = 0
 while stateQueue:
+    # print(i)
     # grab state, mark as visited, ensure its a state that has not been checked
-    currentState = stateQueue.pop(0)
+    currentState = stateQueue.get()[1]
+    currentState.get_heuristic_score(goalState)
+
+    print("***")
+    print(currentState)
+    print("***")
+
     i += 1
     if currentState.get_grid_string_representation() in visitedStates:
         continue
@@ -73,12 +83,12 @@ while stateQueue:
     currentState.mark_visited()
 
     # update queue length 
-    if maxQueueLength < len(stateQueue):
-        maxQueueLength = len(stateQueue)
+    if maxQueueLength < stateQueue.qsize():
+        maxQueueLength = stateQueue.qsize()
 
     # check if reached a goal state
     if currentState.is_goal_state(goalState):
-        print("Success! iter:" + str(i) + ", depth: " + str(currentState.get_level()) + ", max queue size: " + str(len(stateQueue)))
+        print("Success! iter:" + str(i) + ", depth: " + str(currentState.get_level()) + ", max queue size: " + str(maxQueueLength))
         currentState.print_solution_path()
         finishedState = currentState
         break
@@ -91,7 +101,9 @@ while stateQueue:
     # add all the children to queue
     allChildren = currentState.get_all_children(numberOfBlocks+1)
     for j in range(len(allChildren)):
-        stateQueue.append(allChildren[j])
+        currentChildScore = allChildren[j].get_heuristic_score(goalState)
+        stateQueue.put((currentChildScore, allChildren[j]))
+        # stateQueue.append(allChildren[j])
 
 # print out results
 print("statistics: " + fileName + " method BFS planlen " + str(currentState.get_level()) + " iters " + str(i) + " maxq " + str(maxQueueLength))
