@@ -46,6 +46,9 @@ with open(fileName, "r") as file:
         line = file.readline()
         goalGrid.append(line.strip())
         
+# print("numberOfStacks", numberOfStacks)
+# print("numberOfBlocks", numberOfBlocks)
+# print("numberOfMoves", numberOfMoves)
 # print("Initial")
 # print(initialGrid)
 # print("Goal")

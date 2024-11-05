@@ -46,6 +46,9 @@ with open(fileName, "r") as file:
         line = file.readline()
         goalGrid.append(line.strip())
         
+# print("numberOfStacks", numberOfStacks)
+# print("numberOfBlocks", numberOfBlocks)
+# print("numberOfMoves", numberOfMoves)
 # print("Initial")
 # print(initialGrid)
 # print("Goal")
@@ -68,6 +71,11 @@ while stateQueue:
     # grab state, mark as visited, ensure its a state that has not been checked
     currentState = stateQueue.get()[1]
     currentState.get_heuristic_score(goalState)
+
+    print("***")
+    print(currentState)
+    print("***")
+
     i += 1
     if currentState.get_grid_string_representation() in visitedStates:
         continue
