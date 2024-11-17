@@ -2,6 +2,7 @@ import getopt, sys
 from State import State
 import random
 import math
+import pandas as pd
 
 # parse command lines
 fileName = sys.argv[1]
@@ -28,6 +29,20 @@ with open(fileName, "r") as file:
         line = file.readline()
         goalGrid.append(line.strip())   
 
+
+# print("numberOfStacks", numberOfStacks)
+# print("numberOfBlocks", numberOfBlocks)
+# print("numberOfMoves", numberOfMoves)
+# print("Initial")
+# print(initialGrid)
+# print("Goal")
+# print(goalGrid)
+
+
+data = { 'iteration': 0, 'heur_score' : 0, 'deltaE': math.nan}
+df = pd.DataFrame(data, index=[0])
+
+
 initialState = State(0, None, initialGrid)
 goalState = State(0, None, goalGrid)
 
@@ -36,6 +51,8 @@ goalState = State(0, None, goalGrid)
 # start Simulated Annealing
 finishedState = None
 currentState = initialState
+
+
 t = 100000
 tempThreshold = 0.0001
 
@@ -68,7 +85,7 @@ while True:
     allChildren = currentState.get_all_children(numberOfBlocks+1)
     nextRandomState = random.choice(allChildren)
     deltaE = currentState.get_heuristic_score(goalState) - nextRandomState.get_heuristic_score(goalState)
-    print("delta e: " + str(deltaE))
+    # print("delta e: " + str(deltaE))
 
     # next state is better than current
     if deltaE > 0:
@@ -77,8 +94,20 @@ while True:
         # choose state based on probability
         probability = math.e**(deltaE / t)
         if random.random() <= probability:
-            print("Choosing worse state by probability " + str(probability))
+            print("At Temperature " + str(t) + ", Choosing worse state by probability " + str(probability))
+
+
+    data = { 'iteration' : i, 'heur_score': currentState.get_heuristic_score(goalState), 'deltaE': deltaE }
+    df.loc[len(df)] = data
+
+
+
 
 # print out results
 print(currentState.print_solution_path())
 print("statistics: " + fileName + " method SimulatedAnnealing planlen " + str(currentState.get_level()) + " iters " + str(i))
+
+
+print(df)
+
+

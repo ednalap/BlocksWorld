@@ -2,6 +2,9 @@ import getopt, sys
 from State import State
 from queue import PriorityQueue
 
+import pandas as pd
+
+
 # parse command lines
 # DEFAULT VALUES
 fileName = sys.argv[1]
@@ -46,6 +49,8 @@ with open(fileName, "r") as file:
         line = file.readline()
         goalGrid.append(line.strip())
         
+
+
 # print("numberOfStacks", numberOfStacks)
 # print("numberOfBlocks", numberOfBlocks)
 # print("numberOfMoves", numberOfMoves)
@@ -53,6 +58,11 @@ with open(fileName, "r") as file:
 # print(initialGrid)
 # print("Goal")
 # print(goalGrid)
+
+
+data = { 'iteration': 0, 'heur_score' : 0}
+df = pd.DataFrame(data, index=[0])
+
 
 initialState = State(0, None, initialGrid)
 goalState = State(0, None, goalGrid)
@@ -72,9 +82,23 @@ while stateQueue:
     currentState = stateQueue.get()[1]
     currentState.get_heuristic_score(goalState)
 
-    print("***")
-    print(currentState)
-    print("***")
+    # print("***")
+    # print(currentState)
+    # print("***")
+
+    data = { 'iteration' : i, 'heur_score': currentState.get_heuristic_score(goalState) }
+
+    # the following variations didn't work
+    # newRow = pd.DataFrame(data, index=[0])
+    # newRow = pd.DataFrame({ 'iteration' : i, 'heur_score': currentState.get_heuristic_score(goalState) })
+    # df = df.append(newRow, ignore_index = True)
+    # df = df.append(newRow)
+    # df.loc[i] = newRow
+
+    # so I was forced to use an explicit row number to append
+    # df.loc[i] = data
+    df.loc[len(df)] = data
+
 
     i += 1
     if currentState.get_grid_string_representation() in visitedStates:
@@ -107,3 +131,6 @@ while stateQueue:
 
 # print out results
 print("statistics: " + fileName + " method BFS planlen " + str(currentState.get_level()) + " iters " + str(i) + " maxq " + str(maxQueueLength))
+
+print(df)
+
